@@ -1,0 +1,152 @@
+Jenkins - 14 sessions may continue(notes)
+Ansible	- 14 sessions 
+Docker - 17
+kubernates - 12
+Linux	- 6 sessions
+GIT	- 4 sessions (notes)
+Python	- 4 sessions
+AWS - 4
+Ansible Docker Integration - 1
+End to End Project - 2
+Others - 2((agile-1)jenkins12th and roles and responsibilities(ansible)31st class)
+AWS migration - 1
+maven - 1
+Demo - 1
+
+
+------------------------
+doubts:
+-------
+
+1. what options need to be given while adding ports in eks cluster
+2. helm install not creating pods for few images.
+3. terminal in eks cluster like in gke
+4. no data shown in grafana dashboard
+5. autoscalling
+6. not able to create pods sometimes. it will be in pending only 
+7. project
+
+
+--------------------------------
+Interview question of kubernates:
+
+1. diff. between docker swarm and kubernates
+A. docker swarm is docker container orchestration tool(it works only on docker container technology) and 
+kubernates is container orchestration tool(it works on any container technology).
+
+	volumes and auto scalling is not there in docker swarm which is there in kubernates.
+
+
+2. list master slave components.
+
+3. kubectl get namespace.
+A. 	default
+	kube-node-lease
+	kube-public    
+	kube-system 
+
+4. difference replication controller and replica set?
+A. reusability
+
+5. create deployment definition file.
+
+6. how many service objects and name them.
+A. 3 or 4
+	node port
+	load balancer
+	cluster ip
+		- headless
+
+6. project explanation
+a. 8th session
+
+
+===================================================
+menions == node
+
+**************************************************
+
+
+kubernates:
+===========
+
+kubernates 1st session:
+=======================
+Explanation of kubernates objects,
+master and slave components.
+
+
+kubernates 2nd session:
+=======================
+installation of kops server(unmanaged)
+
+
+kubernates 3rd session:
+=======================
+installation of kubeadm server(unmanaged)
+
+
+kubernates 4th session:
+=======================
+installation of managed setup(EKS and GKE)
+
+
+kubernates 5th session:
+=======================
+kubernates definition files
+
+
+kubernates 6th session:
+=======================
+namespace,
+replication controller,
+replica-set,
+scaling,
+deployment files
+
+
+kubernates 7th session:
+=======================
+service objects
+- node port
+- load balancer
+- cluster ip
+kompose installation
+kompose example
+
+
+kubernates 8th session:
+=======================
+project to explain in interview using kubernates files and kompose file 
+
+
+kubernates 9th session:
+=======================
+linux session in linux notes
+
+
+kubernates 10th session:
+=======================
+pycharm plugin,
+DaemonSet,
+NodeAffinity,
+Taints and Tolerations
+Secrets.
+
+
+kubernates 11th session:
+=======================
+RequestsandLimits,
+helm tool,
+Monitoring tools - prometheus and grafana
+volumes.
+
+
+kubernates 12th session:
+=======================
+PersistantVolume(PV),
+PersistantVolumeClaim(PVC),
+Volume implementation,
+Statefulset,
+RollingUpdate,
+HorizontalPodAutoScaller
