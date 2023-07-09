@@ -1,9 +1,6 @@
 Day 2
 ========================================================================
-Install docker on Linux
-==============================
-1 Create an Ubuntu instance on AWS
-2 Connect to it using git bash
+
 3 Execute the below 2 commands
   curl -fsSL https://get.docker.com -o get-docker.sh
   sh get-docker.sh
