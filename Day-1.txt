@@ -1,10 +1,6 @@
 Virtualization
 ===================
-This is the process of running multiple OS's parallelly on
-a single pice of h/w.
-Here we have h/w(bare metal) on top of which we have host os
-and on the host os we install an application called as hypervisor
-On the hypervisor we can run any no of OS's as guest OS
+
 
 The disadvantage of this approach is these application running on the
 guest OS have to pass through n number of lavers to access the H/W
