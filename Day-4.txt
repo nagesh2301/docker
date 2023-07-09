@@ -2,9 +2,6 @@ Day 4
 ============================================================================
 To setup a multi container architecture
 ===============================================
-1 Using --link run command option (depricated)
-2 Docker compose
-3 Docker Networkings
 
 4 Python Scripting
 5 Ansible Playbooks
