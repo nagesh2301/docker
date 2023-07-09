@@ -2,9 +2,7 @@
 
 3. vpc creation and creating instances on that vpc and hardcoding the values:
 -----------------------------------------------------------------------------
-1. create vpc
-2. create subnet
-3. create internet gateway
+
 4. attach gateway to vpc and assigning all traffic cidr
 5. creating security group for all ports
 6. assigning subnet_id to  route table
