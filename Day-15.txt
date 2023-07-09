@@ -1,0 +1,109 @@
+Day-15:
+
+
+note: check class notes as well
+
+
+To remove a worker from swarm cluster
+docker node update --availability drain Worker1
+
+To make this worker rejoin the swarm
+docker node update --availability active Worker1
+
+To make worker2 leave the swarm
+Connect to worker2 usig git bash
+docker swarm leave
+
+To make manager leave the swarm
+docker swarm leave --force
+
+To generate the tokenid for a machine to join swarm as worker
+docker swarm join-token worker
+
+To generate the tokenid for a machine to join swarm as manager
+docker swarm join-token manager
+
+To promote Worker1 as a manager
+docker node promote Worker1
+
+To demote "Worker1" back to a worker status
+docker node demote Worker1
+
+
+
+=============================================================================
+FailOver Scenarios of Workers
+================================
+Create httpd with 6 replicas and delete one replica running on the manager
+Check if all 6 replicas are still running
+
+Drain Worker1 from the docker swarm and check if all 6 replicas are running
+on Manager and Worker2,make Worker1 rejoin the swarm
+
+Make Worker2 leave the swarm and check if all the 6 replicas are
+running on Manager and Worker1
+
+1 Create httpd with 6 replicas
+  docker service create  --name webserver -p 9090:80 --replicas 6 httpd
+
+2 Check the replicas running on Manager
+  docker service ps webserver | grep Manager
+
+3 Check the container id
+  docker container ls
+
+4 Delete a replica
+  docker rm -f container_id_from_step3
+
+5 Check if all 6 replicas are running
+  docker service ps webserver
+
+6 Drain Worker1 from the swarm
+  docker node update --availability drain Worker1
+
+7 Check if all 6 replicas are still running on Manager and Worker2
+  docker service ps webserver
+
+8 Make Worker1 rejoin the swarm
+  docker node update --availability active Worker1
+
+9 Make Worker2 leave the swarm
+  Connect to Worker2 using git bash
+  docker swarm leave
+  Connect to Manager
+  
+10 Check if all 6 replicas are still running
+   docker service ps webserver
+
+
+======================================================================
+FailOver Scenarios of Managers
+====================================
+If a worker instance crashses all the replicas running on that
+worker will be moved to the Manager or the other workers.
+If the Manager itself crashes the swarm becomes headless 
+ie we cannot perfrom container orchestration activites in this
+swamr cluster
+
+To avoid this we should maintain multiple managers
+Manager nodes have the status as Leader or Reachable
+
+If one manager node goes down other manager becomes the Leader
+Quorum is resonsible for doing this activity and if uses a RAFT
+algorithm for handling the failovers of managers.Quorum also 
+is responsible for mainting the min number of manager
+
+Min count of manager required for docker swarm should be always
+more than half of the total count of Managers
+
+Total Manager Count  -    Min Manager Required - Fault Tolerance
+      1              -           1             -    0
+      2              -           2             -    0
+      3              -           2             -    1
+      4              -           3             -    1
+      5              -           3             -    2
+      6              -           4             -    2
+      7              -           4             -    3
+      8              -           5             -    3
+
+

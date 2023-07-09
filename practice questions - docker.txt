@@ -1,0 +1,209 @@
+
+day-1:
+
+adv. of docker
+
+lifecycle of software development.
+
+
+day-3
+
+1. Create an nginx contaienr in detached mode and name it webserver
+Also perfrom port mapping
+
+2. Start a jenkins container in detached mode and also perfrom   port mappings
+
+3. Start tomcat as a container and perfrom automatic port mapping
+
+4. Create an ubuntu container and launch interactive terminal
+
+5. Start centos as a container and launch interactive terminal in it
+
+6. Create a mysql container and login as root user and create some sql tables
+
+=====================================================================================
+
+day-4
+
+7. Create 2 busybooks containers c1 and c2 and link them
+
+8. Setup wordpress and link it with mysql container
+
+9. Setup CI-CD environment where a Jenkins container is linked with
+2 tomcat containers for QAserver and PRodserver
+
+10. Setup LAMP architecture
+ 
+ 
+=========================================================================================
+
+day-5:
+
+11. Create a testing environment where a selenium hub container is linked
+with 2 node containers one with chrome and other with firefox installed
+
+12. Create a docker compose file to setup a mysql and wordpress 
+container and link them
+
+13. Create a docker compsoe file to setup the CI-CD environment
+where a jenkins container is linked with 2 tomee containers
+one for qaserver and other for prodserver
+
+=============================================================================================
+
+day-6:
+
+14. Create a docker compose file to setup the LAMP architecture
+vim lamp.yml
+
+15. Create a docker compose file to setup the selenium testing
+environment where a selenium hub container is linked with
+2 node containers one with chrome and other with firefox
+
+16. Create a directory /data and mount it as a volume on an ubuntu container
+Create some files in the mounted volumes and check if the files
+are preserved on the host machine even after the container is deleted
+
+17. These volumes are sharabale between multiple containers
+Create 3 centos containers c1,c2,c3.
+Mount /data as a volume on c1 container ,c2 should use the volume
+used by c1 and c3 should use the volume used by c2
+
+=========================================================================
+
+day-7:
+
+18. one example of docker volume container
+
+19. if we want a file to be available for container we can use the below usecase means the  file will be
+available from host server to container.
+
+20. docker commit image creation
+
+21. dockerfile image creation
+
+==============================================================================
+
+day-8:
+
+22. adv. of dockerfile over docker commit?
+
+23. Create a dockerfile from ubuntu base image and install 
+git in it
+
+24. Explain cache busting
+
+25. COPY keyword in implementing docker software
+
+26. RUN keyword in implementing docker software
+
+27. ADD keyword in implementing jenkins software
+
+================================================================
+
+day-9:
+
+28. volume
+
+29. Create a dockerfile from jenkins base image and make the default user as root
+
+30. Create a docekerfile from nginx base image and expose 90 port
+
+================================================================
+
+day-10:
+
+31. ENTRYPOINT - make ubuntu container behave as jenkins server
+
+32. make ubuntu container behave as nginx
+
+33. Create a dockerfile from ubuntu base image and make it behave like nginx
+
+================================================================
+
+day-11:
+
+34. CMD
+
+35. difference between CMD and ENTRYPOINT
+
+36. Docker Networking
+
+37. Working on docker registry
+
+=================================================
+
+day-12:
+
+38. pushing images on local registry in public mode
+
+39. pushing images in private mode on ECR
+
+40. observing network  name in present working directory in docker compose of default network, 
+
+41. Create a custom bridge network and create a docker compose file
+to start postgres and adminer container on the above created
+network
+
+42. Create a dockerfile and use it directly in docker-compsoe
+
+43. create a customised image from dockerfile in docker-compose
+
+=========================================================================
+
+day-13:
+
+44. Docker compose file to create 2 networks and run  containers  on different network
+
+45. Docker compose file to create  2 containers and also create 2 volumes for both the containers
+
+46. explanation of container orchestration
+
+=========================================================================
+
+day-14:
+
+47. setting up of docker swarm, load balancing, scaling, rolling update
+
+=========================================================================
+
+day-15:
+
+48. high availability
+
+=========================================================================
+
+day-16:
+
+49. overlay network (network load balancing)
+
+50. rolling network update,
+
+51. Create a docker stack file to start 3 replicas of wordpress
+and one replica of mysql
+
+52. Create a stack file to setup CI-cd architecture where a jenkins
+container is linked with tomcats for qa and prod environments
+The jenkins contianers should run only on Manager
+the qaserver tomcat should run only on Worker1 and prodserver
+tomcat should run only on worker2
+
+=========================================================================
+
+day-17:
+
+53. Create a stack file to setup the selenium hub and nodes architecture
+but also specify a upper limit on the h/w
+
+54. Create 3 secrets for postgres user,password and db
+and pass them to the stack file
+
+
+
+******************
+
+how to find out default process of container
+rough document read
+
+
+

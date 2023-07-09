@@ -1,0 +1,92 @@
+Day 3
+==========================================================================
+UseCase 1
+=============
+Create an nginx contaienr in detached mode and name it webserver
+Also perfrom port mapping
+
+docker run  --name webserver -p 8888:80 -d nginx
+
+To check if the nginx container is running
+docker container ls
+
+To access the nginx container from the leve of browser
+public_ip_of_dockerhost:8888
+
+============================================================================
+UseCase 2
+===============
+Start a jenkins container in detached mode and also perfrom   port mapping
+docker run --name myjenkins -d -p 9999:8080 jenkins/jenkins
+
+To see the ports used by the above container
+docker port appserver
+
+To access jenkins from browser
+public_ip_of_docker_host:port_no_from_above_command
+===================================================================================
+UseCase 3
+================
+Start tomcat as a container and perfrom automatic port mapping
+docker run --name appserver -d -P tomee
+
+To see the ports used by the above container
+docker port appserver
+
+To access the tomcat from borwser
+piblic_ip_of_dockerhost:9090
+
+
+=================================================================================
+UseCase
+==================
+Create an ubuntu container and launch interactive terminal
+docker run  --name u1 -it ubuntu
+
+To come out of the centos container
+exit
+=========
+UseCase
+==================
+Start centos as a container and launch interactive terminal in it
+docker run --name mycentos -it  centos
+
+To come out of the centos container
+exit
+
+====================================================================================
+UseCase 
+===================
+Create a mysql container and login as root user and create some sql tables
+
+1 Create a mysql container
+  docker run --name db -d -e MYSQL_ROOT_PASSWORD=intelliqit mysql:5
+
+2 To check if the mysql container is running
+  docker container ls
+
+3 To go into the bash shell of the container
+  docker exec -it db bash
+
+4 To login into the database
+  mysql -u root -p
+  Password: intelliqit
+
+5 To see the list of databases
+  show databases;
+
+6 To move into any of the above database
+  use databasename;
+  Eg: use sys;
+
+7 To create emp and dept tables here
+  Open
+  https://justinsomnia.org/2009/04/the-emp-and-dept-tables-for-mysql/
+  Copy script from emp and dept tables creation
+  Paste in the mysql container
+
+8 To see the data of the tables
+  select * from emp;
+  select * from dept;
+
+============================================================================

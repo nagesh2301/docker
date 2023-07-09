@@ -1,0 +1,183 @@
+Day 6
+==========================================================================
+UseCase
+==============
+Create a docker compose file to setup the LAMP architecture
+vim lamp.yml
+---
+version: '3.8'
+
+services:
+ mydb:
+  image: mysql
+  environment:
+   MYSQL_ROOT_PASSWORD: intelliqit
+
+ apache:
+  image: httpd
+  ports:
+   - 8989:80
+  links:
+   - mydb:mysql
+
+ php:
+  image: php:7.2-apache
+  links:
+   - mydb:mysql
+   - apache:httpd
+...
+
+To create containers from the above file
+docker-compose -f lamp.yml up -d
+
+To delete the containers
+docker-compose -f lamp.yml down
+
+
+========================================================================
+UseCase
+============
+Create a docker compose file to setup the selenium testing
+environment where a selenium hub container is linked with
+2 node containers one with chrome and other with firefox
+
+vim docker-compose.yml
+---
+version: '3.8'
+
+services:
+ hub:
+  image: selenium/hub
+  ports:
+   - 4444:4444
+  container_name: hub
+
+ chrome:
+  image: selenium/node-chrome-debug
+  ports:
+   - 5901:5900
+  links:
+   - hub:selenium
+  container_name: chrome
+
+ firefox:
+  image: selenium/node-firefox-debug
+  ports:
+   - 5902:5900
+  links:
+   - hub:selenium
+  container_name: firefox
+...
+
+To setup the above architecture
+docker-compose up -d
+
+To check the running containers
+docker container ls
+
+To delete the containers
+docker-compose down
+
+
+============================================================================
+Docker Volumes
+====================
+Containers are ephemeral(temporary) but the data processed by the
+containers should be persistent.Once a container is delete all the 
+data of the container is lost
+To preserve the data even if the container is deleted we can use volumes
+
+Volumes are classified into 3 types
+======================================
+1 Simple docker volume
+2 Sharable dokcer volumes
+3 Docker volume containers
+
+Simple Docker volumes
+===========================
+These voluems are used only for preserving the data on the host
+machine even if the containers is deleted
+
+UsedCase
+============
+Create a directory /data and mount it as a volume on an ubuntu container
+Create some files in the mounted volumes and check if the files
+are preserved on the host machine even after the container is deleted
+
+1 Create /data directory
+  mkdir /data
+
+2 Create an ubuntu container and mount the above directory as volume
+  docker run --name u1 -it -v /data ubuntu
+  In the container u1 go into /data directory and create some files
+  cd /data
+  touch file1 file2 file3
+  exit
+
+3 Identify the locatiuon where the mounted data is preserved
+  docker inspect u1
+  Search for "Mounts" section and copy the "Source" path
+
+4 Delete the container
+  docker rm -f u1
+
+5 Check if the data is still present
+  cd "source_path_from_step3"
+  ls
+======================================================================
+Sharable Docker volumes
+============================
+These volumes are sharabale between multiple containers
+
+Create 3 centos containers c1,c2,c3.
+Mount /data as a volume on c1 container ,c2 should use the volume
+used by c1 and c3 should use the volume used by c2
+
+1 Create a centos container c1 and mount /data 
+  docker run --name c2 -it -v /data centos
+
+2 Go into the data folder create files in data folder
+  cd data
+  touch f1 f2
+
+3  Come out of the container without exit
+   ctlr+p,ctlr+q
+
+4 Create another centos container c2 and it should used the voluems used by c1
+  docker run --name c2 -it --volumes-from c1 centos
+  
+5 In the c2 container go into data folder and create some file
+  cd data
+  touch f3 f4
+
+6 Come out of the container without exit
+   ctlr+p,ctlr+q
+
+7 Create another centos container c3 and it should use the volume used by c2
+  docker run --name c3 -it --volumes-from c2 centos
+
+8 In the c3 container go into data folder and create some file
+  cd data
+  touch f5 f6
+
+9 Come out of the container without exit
+   ctlr+p,ctlr+q
+
+10 Go into any of the 3 contianers and we will see all the files
+   docker attach c1
+   cd /data
+  ls
+  exit
+
+12 Identify the location the where the mounted data is stored
+   docker inspect c1
+   Search for "Mounts" section and copy the "Source" path
+
+13 Delete all containers
+   docker rm -f c1 c2 c3
+
+14 Check if the files are still present
+   cd "source_path_from"step12"
+
+
+===================================================================

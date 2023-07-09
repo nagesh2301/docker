@@ -1,0 +1,212 @@
+Day-12:
+
+pushing images on local registry in public mode:
+===============================================
+
+docker run --name lr -d -p 5000:5000 registry
+
+docker pull alpine
+
+docker tag alpine localhost:5000/alpine
+
+docker push localhost:5000/alpine
+
+
+pushing images in private mode on ECR:
+=====================================
+
+IAM: 
+  -- can check  class notes
+
+-----
+
+version: '3.8'
+
+services:
+  mydb:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: intelliqit
+      POSTGRES_DB: mydb
+      POSTGRES_USER: myuser
+
+  adminer:
+    image: adminer
+    ports:
+      - 8080:8080
+
+To setup the containers
+docker compose up -d
+
+To see the list of containers
+docker container ls
+
+To see the list of networks
+docker network ls
+
+  -- network - pwd_default
+
+To above 2 containers will be running on a new bridge network that is created by docker
+compose
+
+To delete the containers
+docker compose down
+This will not only delete the containers it will also delete the networks
+that got created.
+
+
+cd /tmp
+mv docker-compose.yml /tmp
+cd /tmp
+
+docker-compose up -d
+docker network ls
+	tmp_default  -- is the network name
+
+
+========================================================================
+
+
+
+UseCase
+=============
+Create a custom bridge network and create a docker compose file
+to start postgres and adminer container on the above created
+network
+
+1 Create a custom bridge network
+  docker network create --driver bridge --subnet 10.0.0.0/24 intelliqit
+
+2 Create a docker compose file
+  vim docker-compose.yml
+---
+version: '3.8'
+
+services:
+ db:
+  image: postgres
+  environment:
+   POSTGRES_PASSWORD: intelliqit
+   POSTGRES_USER: myuser
+   POSTGRES_DB: mydb
+
+ adminer:
+  image: adminer
+  ports:
+   - 8888:8080
+
+networks:
+ default:
+  external: true
+  name: intelliqit
+...
+
+3 To create the containers
+  docker-compose up -d
+
+4 To see if adminer and postgres contianers are created
+  docker container ls
+
+5 To check if they are running on intelliqit network
+  docker inspect container_id_from_Step4
+
+========================================================================
+
+
+vim docker-compose.yml
+version: '3.8'
+
+services:
+ jenkins:
+  image: jenkins/jenkins
+  ports:
+   - 7070:8080
+  
+
+ mytomcat:
+  image: tomee
+  ports:
+   - 6060:8080
+  
+...
+
+docker compose up -d
+docker  container ls
+docker exec -it cid bash
+whoami
+  -- jenkins will be user
+docker compose down
+
+
+------------------------------------------------------------------------
+
+
+Create a dockerfile and use it directly in docker-compsoe
+
+vim dockerfile
+USER root 
+USER intelliqit
+RUN apt-get update
+RUN apt-get install -y git
+
+
+docker build -t myjenkins .
+
+vim docker-compose.yml
+version: '3.8'
+
+services:
+ jenkins:
+  image: myjenkins
+  ports:
+   - 7070:8080
+  
+
+ mytomcat:
+  image: tomee
+  ports:
+   - 6060:8080
+  
+...
+
+
+
+To start the services
+docker-compose up
+
+
+using above we can see a jenkins container which has git and mvn already installed in it and user will be root.
+
+========================================================================
+
+
+create a customised image from dockerfile in docker-compose:
+
+vim dockerfile
+FROM jenkins/jenkins
+MAINTAINER intelliqit
+RUN apt-get update
+RUN apt-get install -y git
+
+vim docker-compose.yml
+version: '3.8'
+
+services:
+ jenkins:
+  build: .
+  ports:
+   - 7070:8080
+  
+
+ mytomcat:
+  image: tomee
+  ports:
+   - 6060:8080
+  
+...
+
+
+
+To start the services
+docker-compose up
+

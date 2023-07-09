@@ -1,0 +1,172 @@
+
+Day-7:
+
+docker volume container: It is bidirectional means data created host server will be available in container and
+data created in container available in host server even after container is deleted.  if the file is deleted in
+one container or in host server it will reflect in all the containers and host server.
+
+sudo su -
+
+docker volume create myvolume
+
+docker volume inspect myvolume
+
+copy mountpoint: /var/lib/docker/volumes/myvolume/_data
+
+cd /var/lib/docker/volumes/myvolume/_data
+
+touch f1 f2
+
+docker run --name u1 -it -v myvolume:/tmp ubuntu
+		-- we want to access the volume created in host machine in u1 container in /tmp path
+		
+cd /tmp
+
+ls  -- f1 and f2 files  are visible here
+
+touch f3 f4
+
+exit from container
+
+docker rm -f 
+
+cd /var/lib/docker/volumes/myvolume/_data
+
+ls  -- files created in host and container all files are visible even after deletion  of container
+
+
+---
+
+usecase: if we want a file to be available for container we can use the below usecase means the  file will be
+available from host server to container.
+
+docker run --name t1 -d 9090:8080 tomee
+
+docker volume create newvolume
+ 
+/var/lib/docker/volumes/newvolume/_data
+
+cd /var/lib/docker/volumes/newvolume/_data
+
+vim tomcat-user.xml
+<tomcat>
+        <users username="nagesh" password="boddupally"/>
+        fjldsgsldgjldsfjdl
+</tomcat>
+
+docker run --name t2 -d -p 8888:8080 -v newvolume:/tmp tomee
+
+docker exec -it t2 bash
+ 
+cd /tmp
+
+cat tomcat-user.xml
+<tomcat>
+        <users username="nagesh" password="boddupally"/>
+        fjldsgsldgjldsfjdl
+</tomcat>
+
+
+docker volume prune -f   -- for deleting volumes
+-----
+
+create images:
+
+docker run --name u1 -it ubuntu
+
+apt-get update
+
+apt-get install git
+
+apt-get install maven
+
+ctrl+p, ctrl+q
+
+docker rm -f u1 -- deleted container means all intalled softwares also gets deleted
+
+docker run --name u1 -it ubuntu  -- even after creating container with same name as previous container where 
+									software are installed then wont reflect in presently created container
+		
+apt-get update
+
+apt-get install git
+
+apt-get install maven
+
+ctrl+p, ctrl+q
+		
+docker commit u1 myubuntu
+
+docker images  -- myubuntu image will reflect here
+
+				-- if we check  in this container which is created with myubuntu images git and maven are already
+				installed in this  container. We can create many container  as our wish with this image
+				
+
+
+=============================================================================
+Dockerfile
+===================
+Dockerfile uses predefined keyword to create customsied
+docker images.
+
+Important keyword in dockerfile
+===================================
+FROM : This is used to specify the base image from where a
+customised docker image has to be created
+
+MAINTAINER : This represents the name of the organization or the
+author that has created this dockerfile
+
+RUN :Used to run linux commands in the container
+     Generally it used to do s/w installtion or
+     running scripts
+
+USER : This is used to specify who should be the default user
+       to login into the container
+
+COPY : Used to copy files from host to the customised image that
+       we are creating
+
+ADD : This is similar to copy where it can copy files from host
+      to image but ADD can also downlaod files from some remote server
+
+EXPOSE : USed to specify what port should be used by the container
+
+VOLUME : Used for automatic volume mounting ie we will have a volume
+         mounted automatically when the container start
+
+WORKDIR : Used to specify the default working directory of the container
+
+
+
+ENV : This is used to specify what environment varibles should
+     be used
+
+CMD : USed to run the default process of the container from outside
+      
+ENTRYPOINT : This is also used to run the default process of the container
+             
+LABEL: Used to store data about the docker image in key value pairs
+
+SHELL : Used to specify what shell should be by default used by the image
+
+===========
+
+UseCase
+===========
+Create a dockerfile to use nginx as abse image and specify
+the maintainer as intelliqit
+
+1 Create docker file
+vim dockerfile
+
+FROM nginx
+MAINTAINER intelliqit
+
+2 To create an image from this file
+  docker build -t mynginx .
+
+3 Check if the image is created or not
+  docker images
+

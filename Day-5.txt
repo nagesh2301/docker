@@ -1,0 +1,103 @@
+Day 5
+==============================================================================
+UseCase
+================
+Create a testing environment where a selenium hub container is linked
+with 2 node containers one with chrome and other with firefox installed
+
+1 Create a selenium hub container
+  docker run --name hub -d -p 4444:4444  selenium/hub 
+
+2 Create a container with chrome installed on it
+  docker run --name chrome -d -p 5901:5900 --link hub:selenium 
+                                            selenium/node-chrome-debug
+
+3 Create another container with firefox installed on it
+  docker run --name firefox -d -p 5902:5900 --link hub:selenium 
+                                           selenium/node-firefox-debug
+
+4 The above 2 containers are GUI ubuntu containers and we can
+  access their GUI using VNC viewer
+  a) Install VNC viewer from
+     https://www.realvnc.com/en/connect/download/viewer/
+
+  b) Open vnc viewer--->Public ip of docker host:5901 or 5902
+     Click on Continue--->Enter password: secret
+
+
+======================================================================
+Docker compose
+=======================
+The disadvantage of "link" option is it is depricated and 
+the same individual command have to be given multiple times
+to setup similar architectures.
+To avaoid this we can use docker compose
+Docker compose uses yml files to setup the multu container 
+architecture and these files can be resused any number of time
+============================================================================
+USeCase
+==============
+Create a docker compose file to setup a mysql and wordpress 
+container and link them
+
+vim docker-compose.yml
+---
+version: '3.8'
+
+services:
+ mydb:
+  image: mysql:5
+  environment:
+   MYSQL_ROOT_PASSWORD: intelliqit
+
+ mywordpress:
+  image: wordpress
+  ports:
+   - 8888:80
+  links:
+   - mydb:mysql
+...
+
+To setup the containers from the above file
+docker-compose up -d
+
+To stop all the container of the docker compose file
+docker-compose stop
+
+To start the container
+docker-compose start
+
+To stop and delete
+docker-compose down
+===================================================================================
+UseCase
+=================
+Create a docker compsoe file to setup the CI-CD environment
+where a jenkins container is linked with 2 tomee containers
+one for qaserver and other for prodserver
+
+vim docker-compose.yml
+---
+version: '3.8'
+
+services:
+ myjenkins:
+  image: jenkins/jenkins
+  ports:
+   - 5050:8080
+
+ qaserver:
+  image: tomee
+  ports:
+   - 6060:8080
+  links:
+   - myjenkins:jenkins
+
+ prodserver:
+  image: tomee
+  ports:
+   - 7070:8080
+  links:
+   - myjenkins:jenkins
+...
+=======================================================================

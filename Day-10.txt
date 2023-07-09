@@ -1,0 +1,87 @@
+Day-10:
+
+
+for ubuntu, busybox, these type of images bash is default process.
+
+nginx, sql etc these type of images bash is not default process.
+
+
+Using ENTRYPOINT keyword we can change the default process of container and make it behave as another container
+
+
+usecase:
+
+vim dockerfile:
+
+FROM ubuntu
+MAINTAINER nagesh
+
+RUN apt-get update
+RUN apt-get install -y openjdk-11-jdk
+ADD https://get.jenkins.io/war-stable/2.387.3/jenkins.war /
+
+ENTRYPOINT ["java", "-jar", "jenkins.war"]
+--
+
+docker build -t newubuntu .
+
+docker run --name u2 -it newubuntu
+
+=============================================================================
+
+
+usecase:
+
+vim dockerfile:
+
+FROM ubuntu
+MAINTAINER nagesh
+
+RUN apt-get update
+RUN apt-get install -y nginx
+
+ENTRYPOINT ["nginx", "-g", "daemon off;"]
+EXPOSE 80
+-
+
+docker build -t newubuntu .
+
+docker run --name u2 -d -P newubuntu
+
+docker container ls
+
+browser:
+public_ip:port_no
+
+
+**********************************************************************************************************************************************************************
+
+sir notes from here:
+
+UseCase
+=============
+Create a dockerfile from ubuntu base image and make it behave
+like nginx
+
+1 Create a dockerfile
+  vim dockerfile
+  FROM ubuntu
+  MAINTAINER intelliqit
+  RUN apt-get update
+  RUN apt-get install -y nginx
+  ENTRYPOINT ["/usr/sbin/nginx","-g","daemon off;"]
+  EXPOSE 80
+
+2 Create an image from the above dockerfile
+  docker build -t myubuntu .
+
+3 Create a container from the above image and it will work like nginx
+  docker run --name n1 -d -P myubuntu
+
+4 Check the ports used by nginx
+  docker container ls
+
+5 To access nignx from browser
+  public_ip_of_dockerhost:port_no_captured_from_step4
+
+=================================================================================

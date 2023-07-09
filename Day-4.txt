@@ -1,0 +1,91 @@
+Day 4
+============================================================================
+To setup a multi container architecture
+===============================================
+1 Using --link run command option (depricated)
+2 Docker compose
+3 Docker Networkings
+
+4 Python Scripting
+5 Ansible Playbooks
+
+========================================================================
+
+UseCase
+Create 2 busybooks containers c1 and c2 and link them
+
+1 Create a busybox contaienr and name it c1
+  docker run --name c1 -it busybox
+
+2 To come out of the c1 contaienr without exit
+  ctrl+p,ctrl+q
+
+3 Create another busybox container c2 and link it with c1 container
+  docker run --name c2 -it --link c1:mybusybox  busybox
+
+4 Check if c2 is pinging to c1
+  ping c1
+===========================================================
+UseCase
+==========================================================
+Setup wordpress and link it with mysql container
+
+1 Create a mysql container
+   docker run --name mydb -d -e MYSQL_ROOT_PASSWORD=intelliqit  mysql:5
+
+2 Create a wordpress container and link with the mysql container
+  docker run --name mywordpress -d -p 8888:80 --link mydb:mysql wordpress
+
+3 To check if wordpress and mysql containers are running
+  docker container ls
+
+4 To access wordpress from a browser
+  public_ip_dockerhost:8080
+
+5 To check if wordpress is linked with mysql
+  docker inspect mywordpress
+  Search for "Links" section
+
+=======================================================================
+UseCase
+=============
+Setup CI-CD environment where a Jenkins container is linked with
+2 tomcat containers for QAserver and PRodserver
+
+1 Create a jenkins container
+  docker run  --name myjenkins -d -p 5050:8080 jenkins/jenkins
+
+2 To access jenkins from browser
+  public_ip_dockerhost:5050
+
+3 Create a tomcat container as qaserver and link with jenkins container
+  docker run --name qaserver -d -p 6060:8080 --link myjenkins:jenkins tomee
+
+4 Create another tomcat container as prodserver and link with jenkins
+  docker run --name prodserver -d -p 7070:8080 --link myjenkins:jenkins tomee
+
+5 Check if all 3 containers are running
+  docker container ls
+
+
+
+=======================================================================
+
+
+=======================================================================
+
+
+Setup LAMP architecture 
+
+1 Create mysql container
+  docker run --name mydb -d -e MYSQL_ROOT_PASSWORD=intelliqit mysql
+
+2 Create an apache container and link with mysql container
+  docker run --name apache -d -p 9999:80 --link mydb:mysql httpd
+
+3 Create a php container and link with mysql and apache containers
+  docker run --name php -d --link mydb:mysql --link apache:httpd php:7.2-apache
+
+4 To check if php container is linked with apache and mysql
+  docker inspect php
+===============================================================================

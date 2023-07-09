@@ -1,0 +1,92 @@
+Day: 13
+
+Docker compose file to create 2 networks and run  containers  on different network
+vim docker-compose.yml
+---
+version: '3.8'
+
+services:
+ mydb:
+  image: jenkins/jenkins
+  ports:
+   - 5050:8080
+  networks:
+   - abc
+
+ qaserver:
+  image: tomee
+  ports:
+   - 6060:8080
+  networks:
+   - xyz
+
+ prodserver:
+  image: tomee
+  ports:
+   - 7070:8080
+  networks:
+   - xyz
+
+networks:
+ abc: {}
+ xyz: {}
+...
+
+
+
+===================================================
+Docker compose file to create  2 containers and also create 2 volumes for both the containers
+---
+version: '3.8'
+
+services:
+ db:
+  image: mysql:5
+  environment:
+   MYSQL_ROOT_PASSWORD: intelliqit
+  volumes:
+  - mydb:/var/lib/mysql
+
+ wordpress:
+  image: wordpress
+  ports:
+   - 9999:80
+  volumes:
+   - wordpress:/var/www/html
+
+
+volumes:
+  mydb:
+  wordpress
+
+To start the service
+docker-compose up -d
+
+To see the list of volumes
+docker volume ls
+===================================================================================
+
+Till now docker is for handling developer and testing environment.
+
+To handle production environment we have container orchestration.
+
+
+Features of container orchestration:
+
+Load balancing
+Scaling up and Scaling down
+Rolling update
+High availability
+
+
+Container orchestration is handled by:
+
+Docker swarm
+kubernates
+AWS - ECS
+IBM - openshell
+Apache - mesos
+
+Docker swarm and kubernates only in our syllabus
+
+

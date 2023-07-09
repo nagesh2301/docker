@@ -1,0 +1,218 @@
+Day-14: 
+
+
+Setup of Docker Swarm
+============================
+1 Create 3 AWS ubuntu instances
+2 Name them as Manager,Worker1,Worker2
+3 Install docker on all of them
+4 Change the hostname
+  vim /etc/hostname
+  Delete the content and replace it with Manager or Worker1 or Worker2
+5 Restart
+  init 6
+6 To initilise the docker swarm
+  Connect to Manager AWS instance
+  docker swarm init
+  This command will create a docker swarm and it will also generate
+  a tokenid
+7 Copy and paste the token id in Worker1 and Worker2
+
+===============================================================================
+TCP port 2376 for secure Docker client communication. This port is required for Docker Machine to work. Docker Machine is used to orchestrate Docker hosts.
+
+TCP port 2377. This port is used for communication between the nodes of a Docker Swarm or cluster. It only needs to be opened on manager nodes.
+
+TCP and UDP port 7946 for communication among nodes (container network discovery).
+UDP port 4789 for overlay network traffic (container ingress networking).
+
+=========================================================================
+
+
+
+Load Balancing:
+Each docker containers has a capability to sustain a specific
+user load.To increase this capability we can increase the 
+number of replicas(containers) on which a service can run
+
+UseCase
+------------
+Create nginx with 5 replicas and check where these replicas are
+running
+
+1 Create nginx with 5 replicas
+  docker service create --name webserver -p 8888:80 --replicas 5 nginx
+
+2 To check the services running in swarm
+  docker service ls
+
+3 To check where these replicas are running
+  docker service ps webserver
+
+4 To access the nginx from browser
+  public_ip_of_manager/worker1/worker2:8888
+
+5 To delete the service with all replicas
+  docker service rm webserver
+=========================================================================
+UseCase
+===========
+Create mysql with 3 replicas and also pass the necessary environment
+variables
+
+1 docker service create --name db --replicas 3 
+                    -e MYSQL_ROOT_PASSWORD=intelliqit  mysql:5
+
+2 To check if 3 replicas of mysql are running
+  docker service ps db
+
+
+================================================
+Day 15
+================================================
+Scalling
+============
+This is the process of increasing the number of replicas or decreasing
+the replicas count based on requirement without the end user experiencing
+any down time.
+
+UseCase
+============
+Create tomcat with 4 replicas and scale it to 8 and scale it
+down to 2 
+
+1 Create tomcat with 4 replicas
+  docker service create --name appserver -p 9090:8080 --replicas 4 tomcat
+
+2 Check if 4 replicas are running
+  docker service ps appserver
+
+3 Increase the replicas count to 8
+  docker service scale appserver=8
+
+4 Check if 8 replicas are running
+  docker service ps appserver
+
+5 Decrese the replicas count to 2
+  docker service scale appserver=2
+
+6 Check if 2 replicas are running
+  docker service ps appserver
+
+
+
+
+========================================================================
+Rolling updates
+======================
+Services running in docker swarm should be updated from once
+version to other without the end user downtime
+
+UseCase
+===========
+Create redis:3 with 5 replicas and later update it to redis:4
+also rollback to redis:3
+
+1 Create redis:3 with 5 replicas
+  docker service create --name myredis --replicas 5 redis:3
+
+2 Check if all 5 replicas of redis:3 are running
+  docker service ps myredis
+
+3 Perfrom a rolling update from redis:3 to redis:4
+  docker service update --image redis:4 myredis
+
+4 Check redis:3 replcias are shut down and in tis palce redis:4 replicas are running
+  docker service ps myredis
+
+5 Roll back from redis:4 to redis:3
+  docker service update --rollback myredis
+
+6 Check if redis:4 replicas are shut down and in its place redis:3 is running
+  docker service ps myredis
+
+
+==============================================================================================================================
+Docker swarm commands:
+======================
+
+1. docker swarm init  	--  to install of docker swarm
+
+2. docker node ls	 -- to list the manager and workders
+
+3. docker service create --name webserver -p 8888:80 --replicas 5 nginx		-- to create container in manager and worker
+
+4. docker service ls		-- to list the service
+
+5. docker service ps appserver		-- to see where the replicas are running
+
+6. docker service rm appserver		-- to remove the service
+
+7. docker service scale appserver=8	-- to increate the replicas
+
+8. docker service update --image redis:4 myredis	-- to update the version of image
+
+9. docker service update --rollback myredis	-- to go back to previous version  of image
+
+10. docker service ps myredis| grep \_		-- 
+
+11. docker service ps myredis| grep -v \_		--
+
+12. To remove a worker from swarm cluster
+   	 docker node update --availability drain Worker1
+
+13. To make this worker rejoin the swarm
+	docker node update --availability active Worker1
+
+14. To make worker2 leave the swarm
+	Connect to worker2 usig git bash
+	docker swarm leave
+
+15. To remove node from node list if it is left from cluster
+	docker node rm node_name
+
+16. To make manager leave the swarm
+	docker swarm leave --force
+
+17. To generate the tokenid for a machine to join swarm as worker
+	docker swarm join-token worker
+
+18. To generate the tokenid for a machine to join swarm as manager
+	docker swarm join-token manager
+
+19. To promote Worker1 as a manager
+	docker node promote Worker1
+
+20. To demote "Worker1" back to a worker status
+	docker node demote Worker1
+
+21. docker swarm init --force-new-cluster 	-- to form a new cluster
+
+
+docker stack:
+=============
+
+22. To create a stack from a compose file
+	docker stack deploy -c compose_filename stack_name
+
+23 To see the list of stacks created
+	docker stack ls
+
+23 To see on which nodes the stack services are running
+	docker stack ps stack_name
+
+24 To delete a stack
+	docker stack rm stack_name
+
+25. To inspect in a easy manner
+	docker service inspect selenium-chrome --pretty
+
+
+docker secret:
+==============
+
+26. To create a secret
+	echo "secret_name" docker secret create mysecret -
+
+27. To list the secret
+	docker secret ls

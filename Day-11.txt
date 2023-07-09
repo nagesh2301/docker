@@ -1,0 +1,173 @@
+Day-11
+
+
+FROM ubuntu
+MAINTAINER nagesh
+
+RUN apt-get update
+RUN apt-get install -y nginx
+
+CMD ["nginx", "-g", "daemon off;"]
+EXPOSE 80
+
+
+docker build -t myubuntu .
+
+
+docker run --name u1 -d -P myubuntu
+
+docker run --name u2 -it -P myubuntu date
+	-- here the default process is changed
+	
+docker container ls
+
+*************************************************************************
+
+sir notes:
+
+CMD and ENTRYPOIT
+------------------------
+Bothe of them are used to specify the default process that should be
+triggered when the container starts but the CMD instruction can be 
+overridden with some other process passed at the docker run command
+
+Eg:
+FROM ubuntu
+RUN apt-get update
+RUN apt-get install -y nginx
+CMD ["/usr/sbin/nginx","-g","daemon off;"]
+EXPOSE 80
+
+Though the default process is to trigger nginx we can bypass that
+and make it work on some other process
+
+docker build -t myubuntu .
+Create a container
+docker run --name u1 -it -d myubuntu
+Here if we inspect the default process we will see that 
+nginx as the default process
+docker container ls
+
+on the otherhand we can modify that default process to something else
+docker run --name u1 -d -P myubuntu ls -la
+Now if we do "docker container ls"  we will see the dafault process
+to be "ls -la"
+
+
+=================================================================================
+Docker Networking
+==========================
+Docker supports 4 types of networks
+1 Bridge
+2 Host
+3 Null
+4 Overlay
+========================================================================== 
+UseCase
+===============
+Create 2 bridge networks intelliq1 and intelliq2
+Create 2 busybox containers c1,c2 and c3
+c1 and c2 should run on intelliq1 network and shoul ping each other
+c3 should run on intelliq2 network and it should not be able to ping c1 or c2
+Now put c2 on intelliq2 network,since c2 is on both intelliq1 and intelliq2
+networks it should be able to ping to both c1 and c3
+but c1 and c3 should not ping each other directly
+
+1 Create 2 bridge networks
+  docker network create --driver bridge intelliq1
+  docker network create --driver bridge intelliq2
+
+2 Check the list of available networks
+  docker network ls
+
+3 Create a busybox container c1 on intelliqi1 network
+  docker run --name c1 -it --network intelliq1 busybox
+  Come out of the c1 container without exit ctrl+p,ctrl+q
+
+4 Identify the ipaddress of c1
+  docker inspect c1
+
+5 Create another busybox container c2 on intelliq1 network
+  docker run --name c2 -it --network intelliq1 busybox
+  ping ipaddress_of_c1    (It will ping)
+  Come out of the c2 container without exit ctrl+p,ctrl+q
+
+6 Identify the ipaddress of c2
+  docker inspect c2
+
+7 Create another busybox container c3 on intelliq2 network
+  docker run --name c3 -it --network intelliq2 busybox
+  ping ipaddress_of_c1  (It should not ping)
+  ping ipaddress_of_c2  (It should not ping)
+  Come out of the c3 container without exit ctrl+p,ctrl+q
+
+8 Identify the ipaddress of c3
+  docker inspect c3 
+
+9 Now attach intelliq2 network to c2 container
+  docker network connect intelliq2 c2
+
+10 Since c2 is now on both intelliq1 and intelliq2 networks it should ping
+   to both c1 and c3 containers
+   docker attach c2
+   ping ipaddress_of_c1  (It should  ping)
+   ping ipaddress_of_c3  (It should  ping)
+   Come out of the c2 container without exit ctrl+p,ctrl+q
+
+11 But c1 and c3 should not ping each other
+   docker attach c3
+   ping ipaddress_of_c1  (It should not ping)
+
+--
+
+docker network create --drive bridge --subnet 10.10.10.0/28 intelliqit
+
+32-28 =4 = 2 power 4 =16
+
+docker run --name n1 -d -P --network intelliqit nginx
+
+docker inspect n1
+
+===============================================================================
+
+Working on docker registry
+==============================
+This is the location where the docker images are saved
+This is of 2 types
+1 Public registry
+2 Private regsitry
+
+UseCase
+Create a customised centos image and upload into the public registry
+
+1 Signup into hub.docker.com
+
+2 Create a customsied centos image
+  a) Create a centos container and install git init
+     docker run --name c1 -it centos
+    yum -y update
+    yum -y install git
+    exit
+
+  b) Save this container as an image
+     docker commit c1 intelliqit/mycentos
+
+3 Login into dockerhub
+  docker login
+  Enter username and password of dockerhub
+
+4  Push the customised image
+   docker push intelliqit/mycentos
+
+--
+before that create repository in docker hub in your account
+image name should be username/imagename
+
+then push into docker hub
+
+we can also pull 
+docker pull imagename
+
+--
+
+we can also create private repositories(but in free hub account only one private repository can be created)

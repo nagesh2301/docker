@@ -1,0 +1,173 @@
+Day-16
+
+Overlay Networking
+=========================
+This is the deafult network used by swarm
+and this network perfrom network load balancin
+ie even if a service is running on a specicfic  worker we can
+access if from orther slave
+
+UseCase
+=============
+Start nginx with 2 repliacs and check if we can acces it from 
+browser from manager and all workers
+
+1 Create nginx
+  docker service create  --name webserver -p 8888:80 --replicas 2 nginx
+
+2 Check where these 2 replcas are running
+  docker service ps webserver
+  These repliacs will be running on only 2 nodes and we will have a third
+  node where it it not running
+
+3 Check if we can access nginx from the third node where it is not present
+  public_ip_of_thirdnode:8888
+
+
+============================================================================
+UseCase
+===========
+Create 2 overlay networks intelliqit1 and intelliqit2
+Create httpd with 5 replacs on intelliqit1 network
+Create tomcat with 5 replicas on default overlay "ingres" network
+and later perform rolling network update to intelliqit2 network
+
+1 Create 2 overlay networks
+  docker network create  --driver overlay intelliqit1
+  docker network create  --driver overlay intelliqit2
+
+2 Check if 2 overlay networks are created
+  docker network ls
+
+3 Create httpd with 5 replcias on inteliiqit1 network
+  docker service create  --name webserver -p 8888:80 --replicas 5 
+                                           --network intelliqit1 httpd
+
+4 To check if httpd is running on intelliqit1 network
+  docker service inspect webserver
+  This command will generate the output in JSON format
+  To see the above output in normal text fromat
+  docker service inspect webserver --pretty
+
+5 Create tomcat with 5 replicas on the deafult ingres network
+  docker service create --name appserver -p 9999:8080 --replicas 5 tomcat
+
+6 Perform a rolling network update from ingres to intelliqit2 network
+  docker service update --network-add intelliqit2 appserver
+
+7 Check if tomcat is now running on intelliqit2 network
+  docker service inspect appserver --pretty
+
+Note: To remove from intelliqit2 network
+      docker service update --network-rm intelliqit2 appserver
+
+
+===============================================================================
+===============================================================================
+Docker Stack
+=====================
+docker compose + docker swarm = docker stack
+docker compose + kubernetes = kompose
+
+Docker compose when implemented at the level of docker swarm
+it is called docker stack.Using docker stack we can create an orchestreta
+a micro services architecture at the level of production servers
+
+1 To create a stack from a compose file
+  docker stack deploy -c compose_filename stack_name
+
+2 To see the list of stacks created
+  docker stack ls
+
+3 To see on which nodes the stack services are running
+  docker stack ps stack_name
+
+4 To delete a stack
+  docker stack rm stack_name
+
+=====================================================================
+UseCase
+================
+Create a docker stack file to start 3 replicas of wordpress
+and one replica of mysql
+
+vim stack1.yml
+---
+version: '3.8'
+
+services:
+ db:
+  image: "mysql:5"
+  environment:
+   MYSQL_ROOT_PASSWORD: intelliqit
+
+ wordpress:
+  image: wordpress
+  ports:
+   - "8989:80"
+  deploy:
+   replicas: 3
+
+To start the stack file
+docker stack deploy -c stack1.yml mywordpress
+
+To see the services running
+docker service ls
+
+To check where the serives are running
+docker stack ps mywordpress
+
+To delete the stack
+docker stack rm mywordpress
+
+
+=====================================================================
+UseCase
+==============
+Create a stack file to setup CI-cd architecture where a jenkins
+container is linked with tomcats for qa and prod environments
+The jenkins contianers should run only on Manager
+the qaserver tomcat should run only on Worker1 and prodserver
+tomcat should run only on worker2
+
+vim stack2.yml
+---
+version: '3.8'
+
+services:
+ myjenkins:
+  image: jenkins/jenkins
+  ports:
+   - 5050:8080
+  deploy:
+   replicas: 2
+   placement:
+    constraints:
+     - node.hostname == Manager
+
+ qaserver:
+  image: tomcat
+  ports:
+   - 6060:8080
+  deploy:
+   replicas: 3
+   placement:
+    constraints:
+     - node.hostname == Worker1
+
+ prodserver:
+  image: tomcat
+  ports:
+   - 7070:8080
+  deploy:
+   replicas: 4
+   placement:
+    constraints:
+     - node.hostname == Worker2
+...
+
+To start the services 
+docker deploy -c stack2.yml ci-cd
+
+To check the replicas 
+docker stack ps ci-cd

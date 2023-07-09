@@ -1,0 +1,89 @@
+Day-8
+
+Create a dockerfile from ubuntu base image and install 
+git in it
+
+1 Create dockerfile
+  vim dockerfile
+  FROM ubuntu
+  MAINTAINER intelliqit
+  RUN apt-get update
+  RUN apt-get install -y git
+
+2 Create an image from the above file
+  docker build -t myubuntu .
+
+3 Check if the new image is created
+  docker images
+
+4 Create a container from the new image and it should have git installed
+  docker run  --name u1 -it myubuntu
+  git --version
+
+
+
+
+Cache Busting
+===================
+When we create an image from a dockerfile docker stores all the 
+executed isntructions in a its cache.Next time if we edit the
+same docker file and add few new instructions and build an image
+out of it docker will not execute the previously executed statements
+Instead it will read them from the cache
+This is a time saving mechanism
+The disadvantage is if the docker file is edited with a huge time
+gap then we might end up installing s/w's that are outdated
+
+Eg: 
+FROM ubuntu
+RUN apt-get update
+RUN apt-get install -y git
+
+If we build an image from the above dockerfile docker saves all 
+these instructions in the dockercache and if we add the below
+statement
+RUN apt-get install -y tree
+only this latest statement will be excuted
+
+To avoid this problem and make docker execute all the instructions 
+once more time without reading from cache we use "cache busting"
+docker build --no-cache -t myubuntu .
+
+
+
+
+
+copy keyword in implementing docker software:
+=============================================
+
+FROM ubuntu
+MAINTAINER nagesh
+
+COPY get-docker.sh /tmp
+RUN sh /tmp/get-docker.sh
+
+
+
+
+RUN keyword in implementing ansible software:
+============================================
+
+FROM ubuntu
+MAINTAINER intelliqit
+
+RUN apt-get update
+RUN apt-get install -y software-properties-common
+RUN apt-get install -y ansible
+
+
+
+
+ADD keyword in implementing jenkins software:
+============================================
+
+FROM ubuntu
+MAINTAINER nagesh
+
+ADD https://get.jenkins.io/war-stable/2.387.3/jenkins.war /tmp
+
+

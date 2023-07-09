@@ -1,0 +1,113 @@
+Day-17:
+
+UseCase
+Create a stack file to setup the selenium hub and nodes architecture
+but also specify a upper limit on the h/w
+
+vim stack3.yml
+---
+version: '3.8'
+
+services:
+ hub:
+  image: selenium/hub
+  ports:
+   - 4444:4444
+  deploy:
+   replicas: 2
+   resources:
+    limits:
+     cpus: "0.1"
+     memory: "300M"
+
+ chrome:
+  image: selenium/node-chrome-debug
+  ports:
+   - 5901:5900
+  deploy:
+   replicas: 3
+   resources:
+    limits:
+     cpus: "0.01"
+     memory: "100M"
+
+ firefox:
+  image: selenium/node-firefox-debug
+  ports:
+   - 5902:5900
+  deploy:
+   replicas: 3
+   resources:
+    limits:
+     cpus: "0.01"
+     memory: "100M"
+
+
+==================================================================================
+Docker secrets
+===========================
+This is a feature of docker swarm using which we can pass secret data
+to the services running in swarm cluster
+These secrets are created on the host machine and they will be
+availbale from all the replicas in the swarm cluster
+
+1 Create a dcoker secret
+  echo " Hello Intelliqit" | docker secret create mysecret -
+
+2 Create a redis db with 5 replace and mount the secret
+  docker service create --name myredis --replicas 5 --secret mysecret redis
+
+3 Capture one of the replica contianer id
+  docker container ls
+
+4 Check if the secret data is available
+  docker exec -it container_id cat /run/secrets/mysecret
+
+
+==============================================================================
+Create 3 secrets for postgres user,password and db
+and pass them to the stack file
+
+1 Create secrets
+  echo "intelliqit" | docker secret create pg_password -
+  echo "myuser" | docker secret create pg_user -
+  echo "mydb" | docker secret create pg_db -
+
+2 Check if the secrets are created
+  docker secret ls
+
+3 Create the docker stack file to work on these secrets
+  vim stack6.yml
+---
+version: '3.1'
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/pg_password
+      POSTGRES_USER_FILE: /run/secrets/pg_user
+      POSTGRES_DB_FILE: /run/secrets/pg_db
+    secrets:
+     - pg_password
+     - pg_user
+     - pg_db
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    deploy:
+     replicas: 2
+
+secrets:
+    pg_password:
+     external: true
+    pg_user:
+     external: true
+    pg_db:
+     external: true
+
+...
+
+=========================================================================
