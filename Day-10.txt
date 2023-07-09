@@ -1,10 +1,6 @@
 Day-10:
 
 
-for ubuntu, busybox, these type of images bash is default process.
-
-nginx, sql etc these type of images bash is not default process.
-
 
 Using ENTRYPOINT keyword we can change the default process of container and make it behave as another container
 
