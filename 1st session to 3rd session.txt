@@ -1,0 +1,130 @@
+
+1st session:
+------------
+
+1. Elastic IP
+2. AMI(amazon machine image)
+3. Auto scalling
+
+
+for AMI:
+
+<tomcat-users>
+        <user username="intelliqit" password="intelliqit" roles="managed"/>
+</tomcat-users>
+
+
+
+
+2nd session:
+------------
+
+VPC:
+----
+1st step: create VPC
+2nd step: create 2 subnet (dividing VPC into subnets)
+3rd step: attach internet gateway
+- attach vpc to gateway
+- all traffic cidr_block
+- changes in subnet1
+
+	then create instance in this VPC and 1 server in subnet1 and other in subnet2 and observe
+	the IP addresses.
+
+
+
+Terraform:
+----------
+1. download pycharm
+2. download terraform and set path in environment variables
+3. create IAM user and donwload credentials file
+4. download terraform plugin for pycharm and install in pycharm.
+
+	create new project, open in new window and new file(main.tf) in that project.
+	start writing the code.
+
+
+
+terraform terminal commands:
+----------------------------
+
+1. terraform init		-- to establish connection and to download code libraries of provider
+
+2. terraform apply		-- to implement whatever written in main.tf file
+
+3. terraform destroy	-- to delete resources whatever created using main.tf file
+
+4. terraform apply -auto-approve		-- to automatically approve the implement
+
+5. terraform destroy -auto-approve		-- to automatically approve the deletion
+
+6. terraform apply -var-file myvars.tfvars -auto-approve	-- '-var-file' if we don't use this by default it will 
+		consider the variables file as terraform.tfvars
+
+7. terraform destroy -target aws_instance.vpc_server -auto-approve		-- for deleting particular resource which
+		is creating using main.tf file
+
+
+
+1. establishing connection and creating instance
+------------------------------------------------
+
+main.tf:
+--------
+provider "aws" {
+  region="us-east-1"
+  access_key="AKIAT4LM35N6W2FMQWLB"
+  secret_key="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"
+}
+
+resource "aws_instance" "intelliqit1" {
+  ami="ami-053b0d53c279acc90"
+  instance_type="t2.micro"
+  tags = {
+    Name="intelliqit2"
+  }
+  count=3
+}
+
+
+
+
+
+3rd session:
+------------
+
+2. establishing connection and creating vpc, subnet and instance
+----------------------------------------------------------------
+
+main.tf
+-------
+provider "aws" {
+  region="us-east-1"
+  access_key = "AKIAT4LM35N6QHHFBXML"
+  secret_key = "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"
+}
+
+resource "aws_vpc" "myvpc2" {
+  cidr_block = "11.0.0.0/24"
+  tags = {
+    Name="myvpc2"
+  }
+}
+
+resource "aws_subnet" "mysubnet01" {
+  vpc_id     = aws_vpc.myvpc2.id
+  cidr_block = "11.0.0.0/25"
+  tags       = {
+    Name = "mysubnet01"
+  }
+}
+
+  resource "aws_instance" "terra_server"{
+    ami="ami-053b0d53c279acc90"
+    tags = {
+      Name="terra_server"
+    }
+    count=2
+    instance_type="t2.micro"
+}
+

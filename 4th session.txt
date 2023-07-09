@@ -1,0 +1,342 @@
+
+
+3. vpc creation and creating instances on that vpc and hardcoding the values:
+-----------------------------------------------------------------------------
+1. create vpc
+2. create subnet
+3. create internet gateway
+4. attach gateway to vpc and assigning all traffic cidr
+5. creating security group for all ports
+6. assigning subnet_id to  route table
+7. creating instance and assigning declaring public_IP needed.
+
+
+main.tf:
+--------
+
+provider "aws" {
+  region="us-east-1"
+  access_key = "AKIAT4LM35N6QHHFBXML"
+  secret_key = "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"
+}
+
+resource "aws_vpc" "myvpc2" {
+  cidr_block = "11.0.0.0/24"
+  tags = {
+    Name="myvpc2"
+  }
+}
+
+resource "aws_subnet" "mysubnet01" {
+  vpc_id     = aws_vpc.myvpc2.id
+  cidr_block = "11.0.0.0/25"
+  tags       = {
+    Name = "mysubnet01"
+  }
+}
+
+resource "aws_internet_gateway" "my_gateway"{
+  vpc_id = aws_vpc.myvpc2.id
+  tags = {
+    Name = "my_gateway"
+  }
+}
+
+resource "aws_route_table" "my_route" {
+  vpc_id = aws_vpc.myvpc2.id
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.my_gateway.id
+  }
+  tags = {
+    Name = "my_route"
+  }
+}
+
+resource "aws_security_group" "my_Security"{
+  name="my_Security"
+  vpc_id = aws_vpc.myvpc2.id
+  ingress {
+    from_port = 0
+    protocol  = "-1"
+    to_port   = 0
+  }
+  egress {
+    from_port = 0
+    protocol  = "-1"
+    to_port   = 0
+  }
+}
+
+resource "aws_route_table_association" "my_table"{
+  route_table_id = aws_route_table.my_route.id
+  subnet_id = aws_subnet.mysubnet01.id
+}
+
+resource "aws_instance" "vpc_server" {
+  ami="ami-053b0d53c279acc90"
+  instance_type="t2.micro"
+  count=2
+
+  subnet_id = aws_subnet.mysubnet01.id
+  vpc_security_group_ids = [aws_security_group.my_Security.id]
+  associate_public_ip_address = true
+  key_name = "kops_nv"
+}
+
+
+terminal:
+---------
+terraform apply		-- to implement whatever written in main.tf file
+
+terraform destroy	-- to delete resources whatever created using main.tf file
+--------------------------
+
+
+4. using the variables file(terraform.tfvars) on above example:
+------------------------------------------------------------
+
+main.tf:
+-------
+
+provider "aws" {
+  region=var.region
+  access_key = var.access_key
+  secret_key = var.secret_key
+}
+
+variable "region" {}
+variable "access_key" {}
+variable "secret_key" {}
+variable "cidr_vpc" {}
+variable "vpc_name" {}
+variable "cidr_subnet" {}
+variable "subnet_name" {}
+variable "gateway_name" {}
+variable "cidr_route" {}
+variable "route_name" {}
+variable "security_name" {}
+variable "ami" {}
+variable "instance_type" {}
+variable "ins_count" {}
+variable "public_ip" {}
+variable "key_name" {}
+
+resource "aws_vpc" "myvpc2" {
+  cidr_block = var.cidr_vpc
+  tags = {
+    Name=var.vpc_name
+  }
+}
+
+resource "aws_subnet" "mysubnet01" {
+  vpc_id     = aws_vpc.myvpc2.id
+  cidr_block = var.cidr_subnet
+  tags       = {
+    Name = var.subnet_name
+  }
+}
+
+resource "aws_internet_gateway" "my_gateway"{
+  vpc_id = aws_vpc.myvpc2.id
+  tags = {
+    Name = var.gateway_name
+  }
+}
+
+resource "aws_route_table" "my_route" {
+  vpc_id = aws_vpc.myvpc2.id
+  route {
+    cidr_block = var.cidr_route
+    gateway_id = aws_internet_gateway.my_gateway.id
+  }
+  tags = {
+    Name = var.route_name
+  }
+}
+
+resource "aws_security_group" "my_Security"{
+  name=var.security_name
+  vpc_id = aws_vpc.myvpc2.id
+  ingress {
+    from_port = 0
+    protocol  = "-1"
+    to_port   = 0
+  }
+  egress {
+    from_port = 0
+    protocol  = "-1"
+    to_port   = 0
+  }
+}
+
+resource "aws_route_table_association" "my_table"{
+  route_table_id = aws_route_table.my_route.id
+  subnet_id = aws_subnet.mysubnet01.id
+}
+
+resource "aws_instance" "vpc_server" {
+  ami=var.ami
+  instance_type=var.instance_type
+  count=var.ins_count
+
+  subnet_id = aws_subnet.mysubnet01.id
+  vpc_security_group_ids = [aws_security_group.my_Security.id]
+  associate_public_ip_address = var.public_ip
+  key_name = var.key_name
+}
+
+
+
+terraform.tfvars:
+-----------------
+region="us-east-1"
+access_key="AKIAT4LM35N6QHHFBXML"
+secret_key = "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"
+cidr_vpc = "11.11.11.0/24"
+vpc_name = "myvpc2"
+cidr_subnet = "11.11.11.0/25"
+subnet_name = "mysubnet01"
+gateway_name = "my_gateway"
+cidr_route= "0.0.0.0/0"
+route_name="my_route"
+security_name="my_Security"
+ami="ami-053b0d53c279acc90"
+instance_type="t2.micro"
+ins_count = 2
+public_ip = true
+key_name="kops_nv"
+
+
+terminal:
+---------
+terraform apply -auto-approve		-- to automatically approve the implement
+
+terraform destroy -auto-approve		-- to automatically approve the deletion
+
+
+------------------------------------------
+
+5. using the variables file(myvars.tfvars) and changing the data in variables file:
+---------------------------------------------------------------------------------
+
+main.tf:
+--------
+
+provider "aws" {
+  region=var.region
+  access_key = var.access_key
+  secret_key = var.secret_key
+}
+
+variable "region" {}
+variable "access_key" {}
+variable "secret_key" {}
+variable "cidr_vpc" {}
+variable "vpc_name" {}
+variable "cidr_subnet" {}
+variable "subnet_name" {}
+variable "gateway_name" {}
+variable "cidr_route" {}
+variable "route_name" {}
+variable "security_name" {}
+variable "ami" {}
+variable "instance_type" {}
+variable "ins_count" {}
+variable "public_ip" {}
+variable "key_name" {}
+
+resource "aws_vpc" "myvpc2" {
+  cidr_block = var.cidr_vpc
+  tags = {
+    Name=var.vpc_name
+  }
+}
+
+resource "aws_subnet" "mysubnet01" {
+  vpc_id     = aws_vpc.myvpc2.id
+  cidr_block = var.cidr_subnet
+  tags       = {
+    Name = var.subnet_name
+  }
+}
+
+resource "aws_internet_gateway" "my_gateway"{
+  vpc_id = aws_vpc.myvpc2.id
+  tags = {
+    Name = var.gateway_name
+  }
+}
+
+resource "aws_route_table" "my_route" {
+  vpc_id = aws_vpc.myvpc2.id
+  route {
+    cidr_block = var.cidr_route
+    gateway_id = aws_internet_gateway.my_gateway.id
+  }
+  tags = {
+    Name = var.route_name
+  }
+}
+
+resource "aws_security_group" "my_Security"{
+  name=var.security_name
+  vpc_id = aws_vpc.myvpc2.id
+  ingress {
+    from_port = 0
+    protocol  = "-1"
+    to_port   = 0
+  }
+  egress {
+    from_port = 0
+    protocol  = "-1"
+    to_port   = 0
+  }
+}
+
+resource "aws_route_table_association" "my_table"{
+  route_table_id = aws_route_table.my_route.id
+  subnet_id = aws_subnet.mysubnet01.id
+}
+
+resource "aws_instance" "vpc_server" {
+  ami=var.ami
+  instance_type=var.instance_type
+  count=var.ins_count
+
+  subnet_id = aws_subnet.mysubnet01.id
+  vpc_security_group_ids = [aws_security_group.my_Security.id]
+  associate_public_ip_address = var.public_ip
+  key_name = var.key_name
+}
+
+
+
+
+myvars.tfvars:
+--------------
+region="us-east-1"
+access_key="AKIAT4LM35N6QHHFBXML"
+secret_key = "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"
+cidr_vpc = "11.11.12.0/24"
+vpc_name = "myvpc3"
+cidr_subnet = "11.11.12.0/25"
+subnet_name = "mysubnet02"
+gateway_name = "my_gateway1"
+cidr_route= "0.0.0.0/0"
+route_name="my_route1"
+security_name="my_Security1"
+ami="ami-06ca3ca175f37dd66"
+instance_type="m5.large"
+ins_count = 3
+public_ip = true
+key_name="kops_nv"
+
+
+terminal:
+---------
+terraform apply -var-file myvars.tfvars -auto-approve	-- '-var-file' if we don't use this by default it will 
+		consider the variables file as terraform.tfvars
+
+terraform destroy -target aws_instance.vpc_server -auto-approve		-- for deleting particular resource which
+		is creating using main.tf file
